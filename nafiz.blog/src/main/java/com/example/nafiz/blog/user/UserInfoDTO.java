@@ -8,6 +8,7 @@ public class UserInfoDTO {
     private String name;
     private String username;
     private String email;
+    private String password;
     private String contact;
     private String roles;
 }
