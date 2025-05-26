@@ -1,5 +1,6 @@
 package com.example.nafiz.blog.blog;
 
+import com.example.nafiz.blog.user.UserInfo;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
@@ -20,4 +21,7 @@ public class BlogEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserInfo userInfo;
 }

@@ -1,4 +1,4 @@
-package com.example.nafiz.blog.common;
+package com.example.nafiz.blog.common.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
