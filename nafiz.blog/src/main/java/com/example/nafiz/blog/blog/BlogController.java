@@ -25,7 +25,6 @@ public class BlogController {
         return ResponseEntity.ok(blogService.getBlogById(id));
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/all")
     public ResponseEntity<Map<String, Object>> getAllBlogs() {
         return ResponseEntity.ok(blogService.getAllBlogs());

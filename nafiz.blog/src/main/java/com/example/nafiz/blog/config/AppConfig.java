@@ -45,6 +45,7 @@ public class AppConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/user/create",
+                                "/api/blog/all",
                                 "/login",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
