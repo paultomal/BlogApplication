@@ -98,8 +98,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         return email;
     }
 
-    public Boolean isSupervisor() {
-        return roles != null && roles.stream().anyMatch(role -> role.getAuthority().equals("ROLE_SUPERVISOR"));
+    public Boolean isSUser() {
+        return roles != null && roles.stream().anyMatch(role -> role.getAuthority().equals("ROLE_USER"));
     }
 
     public Boolean isEmployee() {

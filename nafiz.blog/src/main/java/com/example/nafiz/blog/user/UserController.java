@@ -50,7 +50,7 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_USER')")
     @PutMapping("/changePassword/{id}")
     public ResponseEntity<Map<String, Object>> changePassword(@PathVariable Long id, @RequestBody ChangePassword changePassword) {
-        if (!Objects.equals(jwtAuthFilter.getCurrentUser(), userService.getUserById(id).get("data").toString()) && !jwtAuthFilter.isSupervisor()) {
+        if (!Objects.equals(jwtAuthFilter.getCurrentUser(), userService.getUserById(id).get("data").toString()) && !jwtAuthFilter.isSUser()) {
             throw new RuntimeException("You cannot change another user's password!");
         }
         return ResponseEntity.ok(userService.changePassword(id, changePassword));

@@ -34,45 +34,75 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public Map<String, Object> createBlog(BlogDTO blogDTO) {
-        BlogEntity saved = blogRepository.save(mapToEntity(blogDTO));
-        log.info("Created blog with ID: {}", saved.getId());
-        return ResponseWrapper.wrap("Blog created successfully", mapToDTO(saved));
+        try {
+            BlogEntity saved = blogRepository.save(mapToEntity(blogDTO));
+            log.info("Created blog with ID: {}", saved.getId());
+            return ResponseWrapper.wrap("Blog created successfully", mapToDTO(saved));
+        } catch (Exception e) {
+            log.error("Failed to create blog", e);
+            return ResponseWrapper.wrapFailure("Failed to create blog");
+        }
     }
+
 
     @Override
     public Map<String, Object> getBlogById(String id) {
-        BlogEntity blog = blogRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Blog not found with id: " + id));
-        log.info("Fetched blog with ID: {}", id);
-        return ResponseWrapper.wrap("Blog fetched successfully", mapToDTO(blog));
+        try {
+            BlogEntity blog = blogRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Blog not found with id: " + id));
+            log.info("Fetched blog with ID: {}", id);
+            return ResponseWrapper.wrap("Blog fetched successfully", mapToDTO(blog));
+        } catch (Exception e) {
+            log.error("Error fetching blog with ID: {}", id, e);
+            return ResponseWrapper.wrapFailure(e.getMessage());
+        }
     }
+
 
     @Override
     public Map<String, Object> getAllBlogs() {
-        List<BlogDTO> blogs = blogRepository.findAll().stream()
-                .map(this::mapToDTO).collect(Collectors.toList());
-        log.info("Fetched {} blog(s)", blogs.size());
-        return ResponseWrapper.wrap("All blogs fetched successfully", blogs);
+        try {
+            List<BlogDTO> blogs = blogRepository.findAll().stream()
+                    .map(this::mapToDTO).collect(Collectors.toList());
+            log.info("Fetched {} blog(s)", blogs.size());
+            return ResponseWrapper.wrap("All blogs fetched successfully", blogs);
+        } catch (Exception e) {
+            log.error("Error fetching all blogs", e);
+            return ResponseWrapper.wrapFailure("Failed to fetch blogs");
+        }
     }
+
 
     @Override
     public Map<String, Object> updateBlog(String id, BlogDTO blogDTO) {
-        BlogEntity blog = blogRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Blog not found with id: " + id));
-        blog.setTitle(blogDTO.getTitle());
-        blog.setContent(blogDTO.getContent());
-        BlogEntity updated = blogRepository.save(blog);
-        log.info("Updated blog with ID: {}", id);
-        return ResponseWrapper.wrap("Blog updated successfully", mapToDTO(updated));
+        try {
+            BlogEntity blog = blogRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Blog not found with id: " + id));
+            blog.setTitle(blogDTO.getTitle());
+            blog.setContent(blogDTO.getContent());
+            BlogEntity updated = blogRepository.save(blog);
+            log.info("Updated blog with ID: {}", id);
+            return ResponseWrapper.wrap("Blog updated successfully", mapToDTO(updated));
+        } catch (Exception e) {
+            log.error("Error updating blog with ID: {}", id, e);
+            return ResponseWrapper.wrapFailure(e.getMessage());
+        }
     }
+
 
     @Override
     public Map<String, Object> deleteBlog(String id) {
-        if (!blogRepository.existsById(id)) {
-            throw new RuntimeException("Blog not found with id: " + id);
+        try {
+            if (!blogRepository.existsById(id)) {
+                throw new RuntimeException("Blog not found with id: " + id);
+            }
+            blogRepository.deleteById(id);
+            log.info("Deleted blog with ID: {}", id);
+            return ResponseWrapper.wrap("Blog deleted successfully", null);
+        } catch (Exception e) {
+            log.error("Error deleting blog with ID: {}", id, e);
+            return ResponseWrapper.wrapFailure(e.getMessage());
         }
-        blogRepository.deleteById(id);
-        log.info("Deleted blog with ID: {}", id);
-        return ResponseWrapper.wrap("Blog deleted successfully", null);
     }
+
 }

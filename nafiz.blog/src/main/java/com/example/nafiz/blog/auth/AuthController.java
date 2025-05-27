@@ -1,5 +1,6 @@
 package com.example.nafiz.blog.auth;
 
+import com.example.nafiz.blog.common.ResponseWrapper;
 import com.example.nafiz.blog.component.UserInfoUserDetailsService;
 import com.example.nafiz.blog.security.JwtService;
 import com.example.nafiz.blog.user.UserInfo;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class AuthController {
@@ -42,36 +44,41 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateGetToken(@RequestBody AuthRequestDTO authRequestDTO) {
-
-//        createSysRoot();
-
+    public ResponseEntity<Map<String, Object>> authenticateGetToken(@RequestBody AuthRequestDTO authRequestDTO) {
         try {
             Authentication authenticate = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername().toLowerCase(), authRequestDTO.getPassword())
+                    new UsernamePasswordAuthenticationToken(
+                            authRequestDTO.getUsername().toLowerCase(),
+                            authRequestDTO.getPassword()
+                    )
             );
+
             if (authenticate.isAuthenticated()) {
-
                 UserInfo user = userRepository.findByUsername(authRequestDTO.getUsername()).orElse(null);
-                ResponseDTO responseDTO = new ResponseDTO();
+                assert user != null;
 
-                responseDTO.setToken(jwtService.generateToken(authRequestDTO.getUsername().toLowerCase(),
-                        (List) userDetailsService.loadUserByUsername(authRequestDTO.getUsername()).getAuthorities()));
+                ResponseDTO responseDTO = new ResponseDTO();
+                responseDTO.setToken(jwtService.generateToken(
+                        authRequestDTO.getUsername().toLowerCase(),
+                        (List) userDetailsService.loadUserByUsername(authRequestDTO.getUsername()).getAuthorities()
+                ));
                 responseDTO.setUsername(authRequestDTO.getUsername().toLowerCase());
                 responseDTO.setRoles(jwtService.extractRole(responseDTO.getToken()));
                 responseDTO.setExpiredDate(jwtService.extractExpiration(responseDTO.getToken()));
-                assert user != null;
                 responseDTO.setUserId(user.getId());
-                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+
+                // ✅ Wrap in status response
+                return ResponseEntity.ok(ResponseWrapper.wrap("Login successful", responseDTO));
             } else {
                 throw new UsernameNotFoundException("Invalid user request!!");
             }
 
         } catch (AuthenticationException e) {
             String errorMessage = "Authentication failed: " + e.getMessage();
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorMessage);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ResponseWrapper.wrapFailure(errorMessage));
         }
     }
+
 
     @GetMapping("/getRole")
     public ResponseEntity<?> getRole(@RequestHeader("Authorization") String token) {
